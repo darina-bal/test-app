@@ -4,16 +4,15 @@ import { useState } from 'react';
 export function useFavorites() {
   const [favorites, setFavorites] = useState<string[]>([]);
 
-  const isFavorite = (id: string) => Boolean(favorites.indexOf(id));
+  // indexOf возвращает позицию, а не признак наличия: -1 («нет») — это true, а 0 («первый») — false.
+  const isFavorite = (id: string) => favorites.includes(id);
 
+  // Массив не меняем, а создаём новый: React перерисует экран, только если в setFavorites пришла
+  // другая ссылка. Функциональная форма берёт актуальное состояние, а не значение из замыкания.
   const toggle = (id: string) => {
-    const index = favorites.indexOf(id);
-    if (index === -1) {
-      favorites.push(id);
-    } else {
-      favorites.splice(index, 1);
-    }
-    setFavorites(favorites);
+    setFavorites((current) =>
+      current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
+    );
   };
 
   return { favorites, isFavorite, toggle };
