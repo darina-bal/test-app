@@ -5,6 +5,7 @@ import { FilterTabs } from '../components/FilterTabs';
 import { MatchCard } from '../components/MatchCard';
 import { StateMessage } from '../components/StateMessage';
 import { UpdatedAgo } from '../components/UpdatedAgo';
+import { useFavorites } from '../hooks/useFavorites';
 import { useMatches, type MatchesState } from '../hooks/useMatches';
 import type { MatchFilter } from '../types';
 import { filterMatches } from '../utils/matches';
@@ -58,6 +59,7 @@ type MatchesListProps = {
 // Всё, что видно, когда данные уже загружены: фильтр, строка обновления и сам список.
 function MatchesList({ state, onReload }: MatchesListProps) {
   const [filter, setFilter] = useState<MatchFilter>('all');
+  const { favorites, isFavorite, toggle } = useFavorites();
   const visibleMatches = useMemo(
     () => filterMatches(state.matches, filter),
     [state.matches, filter],
@@ -82,8 +84,15 @@ function MatchesList({ state, onReload }: MatchesListProps) {
       ) : null}
       <FlatList
         data={visibleMatches}
+        extraData={favorites}
         keyExtractor={(match) => match.id}
-        renderItem={({ item }) => <MatchCard match={item} />}
+        renderItem={({ item }) => (
+          <MatchCard
+            match={item}
+            isFavorite={isFavorite(item.id)}
+            onToggleFavorite={() => toggle(item.id)}
+          />
+        )}
         refreshing={state.refreshing}
         onRefresh={onReload}
         contentContainerStyle={styles.listContent}

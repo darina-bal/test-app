@@ -2,9 +2,12 @@ import { StyleSheet, Text, View } from 'react-native';
 import type { Match, Score } from '../types';
 import { formatKickoff } from '../utils/formatKickoff';
 import { getStatusLabel } from '../utils/matches';
+import { FavoriteButton } from './FavoriteButton';
 
 type Props = {
   match: Match;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
 };
 
 // «2 : 1», а если счёта ещё нет — прочерк. Сравниваем с null, а не проверяем «истинность»:
@@ -19,11 +22,14 @@ function formatStatus(match: Match): string {
   return match.status === 'live' && match.minute !== null ? `${label}, ${match.minute}′` : label;
 }
 
-// Карточка матча: время начала, хозяева, счёт, гости и статус.
-export function MatchCard({ match }: Props) {
+// Карточка матча: время начала и звёздочка «в избранное», хозяева, счёт, гости и статус.
+export function MatchCard({ match, isFavorite, onToggleFavorite }: Props) {
   return (
     <View style={styles.card} testID={`match-${match.id}`}>
-      <Text style={styles.kickoff}>{formatKickoff(match.startsAt)}</Text>
+      <View style={styles.header}>
+        <Text style={styles.kickoff}>{formatKickoff(match.startsAt)}</Text>
+        <FavoriteButton active={isFavorite} onPress={onToggleFavorite} />
+      </View>
       <View style={styles.teams}>
         <Text style={[styles.team, styles.home]} numberOfLines={2}>
           {match.home.name}
@@ -48,6 +54,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#e5e7eb',
     backgroundColor: '#fff',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   kickoff: {
     fontSize: 13,
